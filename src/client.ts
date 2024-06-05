@@ -2,11 +2,9 @@ console.log('client.ts')
 
 
 const form = document.querySelector('form')
-const messageOut = document.getElementById('message-out') ? document.getElementById('message-out') : 'no message'
-const key = document.getElementById('key')
-const iv = document.getElementById('iv')
-const result = document.getElementById('result')
 
+const encryptedMessage = document.getElementById('encryptedmsg')
+const newSecret = document.getElementById('newsecret')
 
 //catch the form submit event
 
@@ -23,35 +21,27 @@ async function processForm(form: FormData) {
     const formMessage = form ? form.get('message') : ''
       console.log("FORM MESSAGE: ", formMessage)
       const messagecontent = formMessage ? formMessage.toString() : 'no message'
-      console.log(messageOut)
-        messageOut.textContent = messagecontent;
-        generateKey().then(({generatedKey, base64Key}) => {
-            key.textContent = base64Key;
-            return encryptMessage(messagecontent, generatedKey);
-        }).then((encrypted) => {
-            iv.textContent = btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)));
-            result.textContent = encrypted.encryptedString;
-            // push the message and iv to the KV store by making a fetch request to /post then the message id and key to the url
-            fetch('/post', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: encrypted.encryptedString,
-                    iv: btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)))
-                })
-            }) 
 
-            //get the response from the fetch request and push the key to the url
-            .then(response => response.json())
-            .then(data => {
-                window.history.pushState({}, '', `${data.id}#${key.textContent}`)
+      generateKey().then(({generatedKey, base64Key}) => {
+        return encryptMessage(messagecontent, generatedKey).then(encrypted => ({encrypted, base64Key}));
+    }).then(({encrypted, base64Key}) => {
+        // push the message and iv to the KV store by making a fetch request to /post then the message id and key to the url
+        return fetch('/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: encrypted.encryptedString,
+                iv: btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)))
             })
+        }).then(response => response.json())
+        .then(data => ({data, base64Key}));
+    }).then(({data, base64Key}) => {
+        window.history.pushState({}, '', `${data.id}#${base64Key}`)
+    })
 
-         
-        
-        })
+
 }
 
 async function generateKey() {
@@ -86,8 +76,80 @@ async function encryptMessage(message: string, key: CryptoKey) {
 }
 
 
+function base64ToArrayBuffer(base64: string) {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
 
 
+function decryptMessage(encryptedString: string, key: CryptoKey, iv: Uint8Array) {
+    //encode the encrypted string to a Uint8Arra
+    const encryptedBuffer = base64ToArrayBuffer(encryptedString);
+    const encryptedArray = new Uint8Array(encryptedBuffer);
+    const decrypted = window.crypto.subtle.decrypt(
+        {
+            name: "AES-GCM",
+            iv: iv
+        },
+        key,
+        encryptedArray
+    )
+    return decrypted;
+}
+
+async function receiveMessage() {
+    console.log('receive message')
+    let key64 = window.location.hash;
+    key64 = key64.replace('#', '');
+    console.log("KEY: ", key64)
+    //convert key from base64 back to cryptokey
+    const keyBuffer = atob(key64);
+    const keyArray = new Uint8Array(keyBuffer.length);
+    for (let i = 0; i < keyBuffer.length; i++) {
+        keyArray[i] = keyBuffer.charCodeAt(i);
+    }
+    const key = await window.crypto.subtle.importKey(
+        'raw',
+        keyArray,
+        'AES-GCM',
+        true,
+        ['encrypt', 'decrypt']
+    )
+
+
+    const encrypted = encryptedMessage?.textContent
+
+    //splt the message and the iv in encrypted by the comma
+    const [message, iv64] = encrypted.split(',');
+    console.log("MESSAGE: ", message)
+    console.log("IV: ", iv64)
+
+    //convert iv from base64 back to Uint8Array
+    const ivBuffer = atob(iv64);
+    const ivArray = new Uint8Array(ivBuffer.length);
+    for (let i = 0; i < ivBuffer.length; i++) {
+        ivArray[i] = ivBuffer.charCodeAt(i);
+    }
+    const iv = ivArray;
+
+    var decrypted = await decryptMessage(message, key, iv)
+    var decryptedString = new TextDecoder().decode(decrypted);
+    console.log(decryptedString)
+    encryptedMessage.textContent = decryptedString;
+
+}
+
+if (encryptedMessage) {
+    receiveMessage();
+    newSecret?.addEventListener('click', () => {
+        window.location.href = '/';
+    })
+}
 
 
 

@@ -28,7 +28,16 @@ textarea {
     padding: 0.2rem;
     border: none;
     resize: none;
+
     font-size: 1.2rem;
+}
+
+
+.msg-container {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 100%;
 }
 
 p {

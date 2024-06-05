@@ -29,18 +29,6 @@ app.get('/', (c) => {
           <button>Generate</button>
 
           </form>
-
-        <div id="output">
-            <p>Message</p>
-            <p id="message-out"></p>
-            <p>Key</p>
-            <p id="key"></p>
-            <p>IV</p>
-            <p id="iv"></p>
-            <p>Encrypted Message</p>
-            <p id="result"></p>
-        </div>
-
      
         </body>
       </html>
@@ -50,7 +38,9 @@ app.get('/', (c) => {
 //deal with a url that has the content in the path
 app.get('/:content', async (c) => {
     const data = c.req.path
-    const message = await c.env.dataTest.get(data)
+    const [id, key] = data.split('#')
+    const idString = id.replace(/\//g, '')
+    const message = await c.env.dataTest.get(idString)
 
     return c.render(
       <html>
@@ -64,9 +54,11 @@ app.get('/:content', async (c) => {
         </head>
         <body>
           <h1>😘😘</h1>
-
-          <p>A client side encrypted pastebin - keep it secret keep it safe</p>
-          <p>{message}</p>
+          <div class="msg-container">
+          <textarea id="encryptedmsg">{message}</textarea>
+          <button id="newsecret">New Secret</button>
+          </div>
+          
         </body>
       </html>
     )
