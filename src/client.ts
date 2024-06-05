@@ -31,9 +31,16 @@ async function processForm(form: FormData) {
         }).then((encrypted) => {
             iv.textContent = btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)));
             result.textContent = encrypted.encryptedString;
-
-            //push the key and iv to the url
-            window.history.pushState({}, '', `#${key.textContent}&&&&${iv.textContent}`)
+            // push the message and iv to the KV store
+            const url = new URL(window.location.href);
+            const key = url.hash.substring(1);
+            const data = {
+                message: messagecontent,
+                iv: encrypted.iv
+            }
+            
+            //push the key to the url
+            window.history.pushState({}, '', `#${key.textContent}`)
         })
 }
 
