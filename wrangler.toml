@@ -4,9 +4,9 @@ pages_build_output_dir = "./dist"
 [vars]
 MY_NAME = "Hono"
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+[[kv_namespaces]]
+binding = "dataTest"
+id = "04d11a7d801342f0835434ea0a16efdb"
 
 # [[r2_buckets]]
 # binding = "MY_BUCKET"

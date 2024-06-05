@@ -1,4 +1,5 @@
 import pages from '@hono/vite-cloudflare-pages'
+import adapter from '@hono/vite-dev-server/cloudflare'
 import devServer from '@hono/vite-dev-server'
 import { defineConfig } from 'vite'
 
@@ -7,7 +8,7 @@ export default defineConfig(({ mode }) => {
     return {
       build: {
         rollupOptions: {
-          input: './src/client.js',
+          input: './src/client.ts',
           output: {
             entryFileNames: 'static/client.js',
           },
@@ -20,6 +21,7 @@ export default defineConfig(({ mode }) => {
         pages(),
         devServer({
           entry: 'src/index.tsx',
+          adapter,
         }),
       ],
     }

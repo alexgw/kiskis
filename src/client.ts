@@ -31,16 +31,26 @@ async function processForm(form: FormData) {
         }).then((encrypted) => {
             iv.textContent = btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)));
             result.textContent = encrypted.encryptedString;
-            // push the message and iv to the KV store
-            const url = new URL(window.location.href);
-            const key = url.hash.substring(1);
-            const data = {
-                message: messagecontent,
-                iv: encrypted.iv
-            }
-            
-            //push the key to the url
-            window.history.pushState({}, '', `#${key.textContent}`)
+            // push the message and iv to the KV store by making a fetch request to /post then the message id and key to the url
+            fetch('/post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: encrypted.encryptedString,
+                    iv: btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)))
+                })
+            }) 
+
+            //get the response from the fetch request and push the key to the url
+            .then(response => response.json())
+            .then(data => {
+                window.history.pushState({}, '', `${data.id}#${key.textContent}`)
+            })
+
+         
+        
         })
 }
 
@@ -74,6 +84,9 @@ async function encryptMessage(message: string, key: CryptoKey) {
     const encryptedString = btoa(String.fromCharCode(...encryptedArray));
     return {encryptedString, iv}
 }
+
+
+
 
 
 
