@@ -14,3 +14,7 @@ npm run dev
 ```txt
 npm run deploy
 ```
+To Do:
+
+- expiration times connect to KV
+- popover/alert on success and clipboard success
