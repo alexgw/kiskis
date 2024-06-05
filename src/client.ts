@@ -39,10 +39,19 @@ async function processForm(form: FormData) {
         .then(data => ({data, base64Key}));
     }).then(({data, base64Key}) => {
         window.history.pushState({}, '', `${data.id}#${base64Key}`)
+        writeClipboardText(window.location.href)
     })
 
 
 }
+
+async function writeClipboardText(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 
 async function generateKey() {
     const generatedKey = await window.crypto.subtle.generateKey(
