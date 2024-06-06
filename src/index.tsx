@@ -13,6 +13,7 @@ app.get('/', (c) => {
     return c.html(
       <html>
         <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
           {import.meta.env.PROD ? (
             <script type='module' src='/static/client.js'></script>
           ) : (
@@ -57,6 +58,7 @@ app.get('/:content', async (c) => {
     return c.render(
       <html>
         <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
           {import.meta.env.PROD ? (
             <script type='module' src='/static/client.js'></script>
           ) : (
