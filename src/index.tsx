@@ -46,7 +46,13 @@ app.get('/:content', async (c) => {
     const data = c.req.path
     const [id, key] = data.split('#')
     const idString = id.replace(/\//g, '')
-    const message = await c.env.dataTest.get(idString)
+    const message = await c.env.dataTest.get(idString)?.then((data) => {
+      if (data) {
+        return data
+      } else {
+        return 'No message found - maybe it has expired or never even existed'
+      }
+    })
 
     return c.render(
       <html>
