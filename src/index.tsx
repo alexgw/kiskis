@@ -24,12 +24,18 @@ app.get('/', (c) => {
           <h1>😘😘</h1>
           <p>A client side encrypted pastebin - keep it secret keep it safe</p>
           <form>
-          <textarea name="message" id="message"></textarea>
-          
-          <button>Generate</button>
-
+            <textarea name="message" id="message"></textarea>
+            <p>Geneate a link and set the expiry time for the message</p>
+            <div class="controls">
+              <button>Generate</button>
+              <select name="expiry" id="expiry">
+                <option value="3600">1 hour</option>
+                <option value="86400">1 day</option>
+                <option value="604800">1 week</option>
+                <option value="2628000">1 month</option>
+              </select>
+            </div>
           </form>
-     
         </body>
       </html>
     )
@@ -71,7 +77,7 @@ app.post('/post', async (c) => {
     let idString = btoa(String.fromCharCode(...id))
     //remove any slashes from the id
     idString = idString.replace(/\//g, '_')
-    await c.env.dataTest.put(idString,`${body.message}, ${body.iv}`)
+    await c.env.dataTest.put(idString,`${body.message}, ${body.iv}`, {expirationTtl: Number(body.expiry)})
     return c.json({ id: idString
     })
   })

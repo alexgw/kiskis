@@ -17,6 +17,10 @@ form?.addEventListener('submit', async (e) => {
 })
 
 async function processForm(form: FormData) {
+
+    const expiry = form.get('expiry')
+
+    console.log("EXPIRY: ", expiry)
     
     const formMessage = form ? form.get('message') : ''
       console.log("FORM MESSAGE: ", formMessage)
@@ -33,13 +37,15 @@ async function processForm(form: FormData) {
             },
             body: JSON.stringify({
                 message: encrypted.encryptedString,
-                iv: btoa(String.fromCharCode(...new Uint8Array(encrypted.iv)))
+                iv: btoa(String.fromCharCode(...new Uint8Array(encrypted.iv))),
+                expiry: expiry
             })
         }).then(response => response.json())
         .then(data => ({data, base64Key}));
     }).then(({data, base64Key}) => {
         window.history.pushState({}, '', `${data.id}#${base64Key}`)
         writeClipboardText(window.location.href)
+
     })
 
 
