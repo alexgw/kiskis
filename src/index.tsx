@@ -37,6 +37,7 @@ app.get('/', (c) => {
               </select>
             </div>
           </form>
+          <div id="mypopover" popover>Copied to Clipboard!</div>
         </body>
       </html>
     )

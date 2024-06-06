@@ -45,6 +45,11 @@ async function processForm(form: FormData) {
     }).then(({data, base64Key}) => {
         window.history.pushState({}, '', `${data.id}#${base64Key}`)
         writeClipboardText(window.location.href)
+        const popover = document.getElementById('mypopover')
+        popover?.showPopover()
+        setTimeout(() => {
+            popover?.hidePopover()
+        }, 2000)
 
     })
 
