@@ -1,5 +1,14 @@
 console.log('client.ts')
 
+const popover = document.getElementById('mypopover')
+
+if (!HTMLElement.prototype.hasOwnProperty("popover")) {
+    popover.innerText = "";
+    popover.style.display = "none";
+    console.log("Popovers not supported");
+}
+
+
 
 const form = document.querySelector('form')
 
@@ -45,11 +54,16 @@ async function processForm(form: FormData) {
     }).then(({data, base64Key}) => {
         window.history.pushState({}, '', `${data.id}#${base64Key}`)
         writeClipboardText(window.location.href)
-        const popover = document.getElementById('mypopover')
+        
+        if (!HTMLElement.prototype.hasOwnProperty("popover")) {
+            popover.innerText = "";
+            console.log("Popovers not supported");
+        }else{
         popover?.togglePopover()
         setTimeout(() => {
-            popover?.togglePopover()
+            popover?.hidePopover()
         }, 2000)
+          }
 
     })
 
@@ -170,7 +184,6 @@ if (encryptedMessage) {
         window.location.href = '/';
     })
 }
-
 
 
 
